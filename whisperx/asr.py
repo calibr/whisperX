@@ -203,7 +203,7 @@ class FasterWhisperPipeline(Pipeline):
                 self.tokenizer = faster_whisper.tokenizer.Tokenizer(self.model.hf_tokenizer,
                                                                     self.model.model.is_multilingual, task=task,
                                                                     language=language)
-                
+
         if self.suppress_numerals:
             previous_suppress_tokens = self.options.suppress_tokens
             numeral_symbol_tokens = find_numeral_symbol_tokens(self.tokenizer)
@@ -253,6 +253,11 @@ class FasterWhisperPipeline(Pipeline):
         results = self.model.model.detect_language(encoder_output)
         language_token, language_probability = results[0][0]
         language = language_token[2:-2]
+
+        if language_probability < 0.5:
+            print(f"Low language detection probability: {language_probability:.2f}, use en")
+            language = "en"
+
         print(f"Detected language: {language} ({language_probability:.2f}) in first 30s of audio...")
         return language
 
